@@ -91,6 +91,18 @@ a { color: inherit; }
 .facts .side img { width: 46%; height: auto; aspect-ratio: 9 / 16; object-fit: cover; rotate: -3deg; }
 .facts .side figcaption { font-size: var(--step-small); color: var(--soft); max-width: 16em; }
 
+/* just dropped: our newest public Shorts as a row of posters, filled in by `python shorts.py site` */
+.latest { background: var(--ink); color: var(--paper); padding-block: 140px; }
+.latest-head { margin: 0 0 64px; font-weight: 900; font-size: clamp(56px, 9vw, 150px); line-height: 0.88; letter-spacing: -0.05em; color: var(--punch); text-transform: lowercase; }
+.drops { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); column-gap: 24px; row-gap: 56px; }
+.drop { display: grid; gap: 14px; align-content: start; text-decoration: none; color: inherit; }
+.drop img { display: block; width: 100%; height: auto; aspect-ratio: 9 / 16; object-fit: cover; rotate: -2deg; transition: transform 300ms var(--ease); }
+.drop:nth-child(even) img { rotate: 2deg; }
+.drop:hover img { transform: translateY(-8px); }
+.drop .who { margin-top: 8px; font-weight: 900; font-size: var(--step-lead); line-height: 1.1; color: var(--punch); text-transform: lowercase; }
+.drop .what { font-size: var(--step-body); line-height: 1.35; color: var(--soft-on-ink); }
+.drop:hover .what { color: var(--paper); }
+
 /* roster: one giant word, then one filled bar per VTuber */
 .roster { background: var(--punch); padding-block: 150px; }
 .col { max-width: 640px; margin: 0 auto; container-type: inline-size; }
@@ -199,7 +211,9 @@ mark.y { background: var(--punch); } mark.p { background: var(--pink); } mark.k 
   .facts > div, .facts .side { grid-column: 1 / -1; }
   .facts > div { font-size: 17px; }
   .facts .side { margin-top: 32px; }
-  .roster, .about { padding-block: 96px; }
+  .roster, .about, .latest { padding-block: 96px; }
+  .drops { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 16px; row-gap: 40px; }
+  .latest-head { margin-bottom: 40px; font-size: 15vw; }
   .verb { --vs: 24vw; }
   .verb p { font-size: 16px; }
   .about .text { columns: 1; font-size: 20px; line-height: 1.25; text-align: left; hyphens: manual; }
@@ -247,6 +261,7 @@ mark.y { background: var(--punch); } mark.p { background: var(--pink); } mark.k 
       </div>
     </div>
   </section>
+  <!-- latest:start --><!-- latest:end -->
 
   <section class="roster wrap" id="roster" aria-labelledby="roster-title">
     <div class="col up">
