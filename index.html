@@ -1,0 +1,374 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>GenieStudio K-VTubers</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Thirty-second clips of Korean VTubers, cut where chat exploded and subtitled in English. Three a day.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@700&text=%EB%82%98%EB%84%A4%EB%85%B8%EB%8B%88%EB%9D%BC%EB%A1%9C%EB%A6%AC%EB%A6%B0%EB%A7%88%EB%AA%A8%EB%B6%80%EB%B9%84%EC%82%AC%EC%8B%9C%EC%95%84%EC%95%BC%EC%98%A4%EC%9C%A0%EC%A0%9C%EC%A6%88%EC%B8%A0%EC%B9%B4%EC%BD%94%EC%BF%A0%ED%82%A4%ED%83%80%ED%85%90%ED%95%98%ED%9B%84%ED%9E%88&display=swap" rel="stylesheet">
+<style>
+/* Layout: a loud flat poster. Solid panels in punch yellow, black and white butt edge to edge, one 12-column grid with
+   24px margins, square corners everywhere except the round VTuber avatars. The punch-subtitle colours of our Shorts
+   (yellow letters, black ink) are the whole palette; pink only marks highlighted facts. */
+:root {
+  --paper: #ffffff;
+  --ink: #000000;
+  --punch: #ffe14d;
+  --punch-step: #f2cf2c;
+  --pink: #ff7ab6;
+  --soft: #474747;
+  --soft-on-ink: #c9c9c9;
+  --face: "M PLUS Rounded 1c", "Arial Rounded MT Bold", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif;
+  --step-small: clamp(0.8125rem, 0.79rem + 0.1vw, 0.875rem);
+  --step-body: clamp(1.0625rem, 1rem + 0.25vw, 1.1875rem);
+  --step-lead: clamp(1.25rem, 1.1rem + 0.7vw, 1.625rem);
+  --step-head: clamp(2rem, 1.3rem + 3.2vw, 4rem);
+  --step-display: clamp(64px, 12.5vw, 196px);
+  --gutter-l: max(24px, env(safe-area-inset-left, 0px));
+  --gutter-r: max(24px, env(safe-area-inset-right, 0px));
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+  color-scheme: light;
+}
+body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--face); font-size: var(--step-body); line-height: 1.5; }
+a { color: inherit; }
+:focus-visible { outline: 3px solid var(--pink); outline-offset: 3px; }
+.wrap { padding-left: var(--gutter-l); padding-right: var(--gutter-r); }
+.btn {
+  display: inline-block; font-weight: 900; font-size: var(--step-body); text-decoration: none; text-transform: lowercase;
+  background: var(--punch); color: var(--ink); padding: 14px 22px; border: 0; cursor: pointer;
+  transition: transform 160ms var(--ease), background-color 160ms var(--ease);
+}
+.btn:hover { background: var(--paper); }
+.btn:active { transform: translateY(2px) scale(0.98); }
+.btn--ink { background: var(--ink); color: var(--punch); }
+.btn--ink:hover { background: var(--pink); color: var(--ink); }
+
+/* hero: two fields meet at half height; the headline swaps punch-subtitle colours at the seam */
+.hero { position: relative; min-height: min(100svh, 900px); overflow: hidden; }
+.field { position: absolute; left: 0; right: 0; }
+.field--top { top: 0; height: 50%; background: var(--ink); }
+.field--bot { bottom: 0; height: 50%; background: var(--punch); }
+/* one headline over both fields: punch letters blended by difference read punch on black and black on punch */
+.stage { position: absolute; inset: 0; display: grid; place-items: center; }
+.headline {
+  margin: 0; font-weight: 900; font-size: var(--step-display); line-height: 0.86; letter-spacing: -0.05em;
+  text-align: center; text-transform: lowercase; transform: translateY(-0.43em); color: var(--punch); mix-blend-mode: difference;
+}
+.line { display: block; overflow: hidden; padding-bottom: 0.06em; }
+.line > span { display: inline-block; }
+.hero-bar {
+  position: absolute; top: 0; left: 0; right: 0; display: flex; justify-content: space-between; align-items: center;
+  padding-top: max(28px, env(safe-area-inset-top, 0px)); padding-left: var(--gutter-l); padding-right: var(--gutter-r); z-index: 2;
+}
+.wordmark { color: var(--punch); font-weight: 900; font-size: var(--step-lead); text-decoration: none; letter-spacing: -0.02em; }
+.hero-foot {
+  position: absolute; left: 0; right: 0; bottom: 40px; z-index: 2; text-align: center;
+  padding-left: var(--gutter-l); padding-right: var(--gutter-r);
+}
+.hero-foot p { margin: 0 auto; max-width: 34em; font-size: var(--step-lead); font-weight: 700; line-height: 1.3; }
+.hero-foot .next { margin-top: 10px; font-size: var(--step-body); font-weight: 400; }
+
+/* showcase: real punch lines stacked, our Short laid over them */
+.show {
+  background: var(--paper); padding-block: 160px 140px; overflow: hidden;
+  display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: 24px; row-gap: 96px; align-items: center;
+}
+.stack { grid-column: 1 / 9; margin: 0; font-weight: 900; font-size: clamp(56px, 9vw, 150px); line-height: 0.88; letter-spacing: -0.05em; text-transform: lowercase; }
+.stack > * { margin: 0; font: inherit; white-space: nowrap; }
+.stack .quote > span { display: block; }
+.stack .quote { color: var(--soft); }
+.stack h2 { margin-top: 0.1em; }
+.clip { grid-column: 9 / 13; justify-self: center; margin: 0; width: min(100%, 360px); aspect-ratio: 9 / 16; rotate: 4deg; background: var(--ink); }
+.clip video, .clip img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.facts { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: 24px; align-items: end; }
+.facts > div { grid-column: 7 / 13; display: grid; gap: 18px; align-content: start; font-size: var(--step-lead); line-height: 1.35; }
+.facts p { margin: 0; }
+.facts .side { grid-column: 1 / 6; margin: 0; display: flex; gap: 20px; align-items: flex-end; }
+.facts .side img { width: 46%; height: auto; aspect-ratio: 9 / 16; object-fit: cover; rotate: -3deg; }
+.facts .side figcaption { font-size: var(--step-small); color: var(--soft); max-width: 16em; }
+
+/* roster: one giant word, then one filled bar per VTuber */
+.roster { background: var(--punch); padding-block: 150px; }
+.col { max-width: 640px; margin: 0 auto; container-type: inline-size; }
+.giant { margin: 0; font-weight: 900; font-size: 30.5cqw; line-height: 0.8; letter-spacing: -0.06em; text-transform: lowercase; }
+.giant-sub { margin: 20px 0 24px; font-size: var(--step-body); }
+.bars { display: grid; gap: 6px; }
+details { background: var(--punch-step); }
+summary {
+  min-height: 56px; display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 0 18px;
+  cursor: pointer; list-style: none; font-weight: 900; font-size: var(--step-body); text-transform: lowercase;
+  transition: background-color 160ms var(--ease);
+}
+summary::-webkit-details-marker { display: none; }
+summary:hover { background: var(--paper); }
+summary .where { font-weight: 700; display: flex; gap: 14px; align-items: center; }
+summary .where::after { content: "+"; font-weight: 900; font-size: 1.4em; line-height: 1; transition: rotate 200ms var(--ease); }
+details[open] summary .where::after { rotate: 45deg; }
+.panel { padding: 6px 18px 20px; display: grid; grid-template-columns: auto 1fr; gap: 14px 20px; align-items: start; }
+.panel img { width: 96px; height: 96px; border-radius: 50%; object-fit: cover; grid-row: span 4; }
+.panel dl { margin: 0; display: grid; grid-template-columns: 1fr auto; gap: 10px 16px; grid-column: 2; }
+.panel dl.solo { grid-column: 1 / -1; }
+.panel dt { font-weight: 700; }
+.panel dd { margin: 0; text-align: right; font-variant-numeric: tabular-nums; }
+.ko { font-family: "Noto Sans KR", "Malgun Gothic", "Apple SD Gothic Neo", sans-serif; }
+
+/* how a clip gets made: one verb at a time, each holding the centre while its picture passes */
+.verbs { background: var(--ink); color: var(--paper); }
+.verb { --vs: var(--step-display); position: relative; min-height: 100svh; display: grid; grid-template-rows: 1fr auto; overflow: clip; }
+.verb > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 38%; }
+.verb::after { content: ""; position: absolute; inset: 0; background: rgba(0, 0, 0, 0.55); }
+.verb .track { position: relative; z-index: 1; }
+.verb h2 {
+  position: sticky; top: calc(50% - var(--vs) * 0.45); margin: 0; text-align: center; font-weight: 900; font-size: var(--vs); line-height: 0.9;
+  letter-spacing: -0.05em; color: var(--punch); text-transform: lowercase;
+}
+.verb p {
+  position: relative; z-index: 1; align-self: end; margin: 0 0 40px; max-width: 30em; font-size: var(--step-lead);
+  line-height: 1.35; padding-left: var(--gutter-l); padding-right: var(--gutter-r);
+}
+.times { display: block; margin-top: 10px; font-size: var(--step-body); color: var(--soft-on-ink); }
+
+/* about: the story set large in two columns, the facts highlighted */
+.about { background: var(--paper); padding-block: 150px; }
+.about .text {
+  columns: 2; column-gap: 32px; font-size: clamp(22px, 2.05vw, 32px); line-height: 1.22; color: var(--soft);
+  text-align: justify; hyphens: auto;
+}
+.about-head { margin: 0 0 48px; font-weight: 900; font-size: var(--step-head); line-height: 1; letter-spacing: -0.03em; text-transform: lowercase; }
+.about b { color: var(--ink); font-weight: 900; }
+.about p { margin: 0 0 0.7em; }
+mark { color: var(--ink); padding: 0 0.1em; -webkit-box-decoration-break: clone; box-decoration-break: clone; }
+mark.y { background: var(--punch); } mark.p { background: var(--pink); } mark.k { background: var(--ink); color: var(--paper); }
+.about .ask { display: inline; background: var(--ink); color: var(--punch); font-weight: 900; padding: 0 0.15em; text-decoration: none;
+  -webkit-box-decoration-break: clone; box-decoration-break: clone; transition: background-color 160ms var(--ease); }
+.about .ask:hover { background: var(--pink); color: var(--ink); }
+
+/* footer: the name, built from blocks */
+.foot { background: var(--ink); color: var(--paper); padding-top: 96px; }
+.blocks { margin-top: 56px; display: flex; gap: 4px; align-items: flex-end; height: 34svh; min-height: 200px; }
+.blocks span {
+  flex: 1; display: grid; place-items: end center; padding-bottom: 0.06em; color: var(--ink); font-weight: 900;
+  font-size: min(15vw, 20svh); line-height: 0.8; letter-spacing: -0.05em; text-transform: lowercase; overflow: hidden;
+}
+.blocks span:nth-child(1) { background: var(--punch); height: 100%; }
+.blocks span:nth-child(2) { background: var(--pink); height: 72%; }
+.blocks span:nth-child(3) { background: var(--paper); height: 88%; }
+.blocks span:nth-child(4) { background: var(--punch); height: 64%; }
+.blocks span:nth-child(5) { background: var(--pink); height: 94%; }
+.links { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: 24px; row-gap: 32px; font-size: 15px; }
+.links nav { grid-column: span 2; display: grid; gap: 8px; align-content: start; }
+.links nav h2 { margin: 0 0 4px; font-size: 15px; font-weight: 900; color: var(--punch); text-transform: lowercase; }
+.links a { text-decoration: none; color: var(--paper); }
+.links a:hover { color: var(--punch); text-decoration: underline; }
+.links .contact { grid-column: 9 / 13; color: var(--soft-on-ink); display: grid; gap: 8px; align-content: start; }
+.links .contact p { margin: 0; }
+.legal { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-top: 56px; font-size: 15px; color: var(--soft-on-ink); }
+
+/* motion: the headline rises from behind its baseline; section parts rise once as they enter */
+@media (prefers-reduced-motion: no-preference) {
+  .js .line > span { transform: translateY(105%); animation: rise 900ms var(--ease) forwards; }
+  .js .line + .line > span { animation-delay: 110ms; }
+  .js .hero-foot, .js .hero-bar .btn { opacity: 0.001; animation: fade 600ms var(--ease) 700ms forwards; }
+  .js .up { transform: translateY(28px); opacity: 0.35; transition: transform 700ms var(--ease), opacity 700ms var(--ease); }
+  .js .up.in { transform: none; opacity: 1; }
+  .clip { animation: drift 7s ease-in-out infinite alternate; }
+}
+@keyframes rise { to { transform: none; } }
+@keyframes fade { to { opacity: 1; } }
+@keyframes drift { from { translate: 0 0; } to { translate: 0 -14px; } }
+
+@media (max-width: 760px) {
+  .hero { min-height: 92svh; }
+  .field--top { height: 46%; } .field--bot { height: 54%; }
+  .stage { place-items: center start; padding-left: 16px; padding-right: 16px; }
+  .headline { font-size: 15.5vw; text-align: left; transform: translateY(calc(-0.43em - 4svh)); }
+  .hero-bar { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+  .hero-foot { text-align: left; bottom: 24px; }
+  .hero-foot p { font-size: 18px; }
+  .hero-foot .next { font-size: 16px; }
+  .wrap, .hero-foot { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+  .show { padding-block: 96px 88px; }
+  .show { row-gap: 48px; }
+  .stack { font-size: 15vw; }
+  .stack, .clip { grid-column: 1 / -1; }
+  .clip { width: 72vw; justify-self: end; }
+  .facts > div, .facts .side { grid-column: 1 / -1; }
+  .facts > div { font-size: 17px; }
+  .facts .side { margin-top: 32px; }
+  .roster, .about { padding-block: 96px; }
+  .verb { --vs: 24vw; }
+  .verb p { font-size: 16px; }
+  .about .text { columns: 1; font-size: 20px; line-height: 1.25; text-align: left; hyphens: manual; }
+  .links nav { grid-column: span 6; }
+  .links .contact { grid-column: 1 / -1; }
+  .blocks { height: 22svh; min-height: 140px; }
+  .blocks span { font-size: 15vw; }
+}
+</style>
+</head>
+<body>
+<script>document.documentElement.classList.add("js");</script>
+
+<header class="hero" aria-labelledby="title">
+  <div class="field field--top"></div>
+  <div class="field field--bot"></div>
+  <div class="stage"><h1 class="headline" id="title"><span class="line"><span>meet the</span></span><span class="line"><span>k-vtubers</span></span></h1></div>
+  <div class="hero-bar">
+    <a class="wordmark" href="#title">genie studio</a>
+    <a class="btn" href="https://www.youtube.com/channel/UCJLASEKgCBydpHn1nBBXpjw" target="_blank" rel="noopener">watch on youtube</a>
+  </div>
+  <div class="hero-foot">
+    <p>Thirty-second clips of Korean VTubers, cut where chat exploded and subtitled in English.</p>
+    <p class="next" id="next">New clips at 08:07, 20:07 and 00:37 Korea time, every day.</p>
+  </div>
+</header>
+
+<main>
+  <section class="show wrap" aria-labelledby="clips">
+    <div class="stack up">
+      <blockquote class="quote"><span>“why didn’t</span><span>you sell?”</span></blockquote>
+      <h2 id="clips">the clips</h2>
+    </div>
+    <figure class="clip" aria-label="Ayatsuno Yuni asks chat why they didn't sell their stocks">
+      <video src="media/yuni-loop.mp4" poster="media/yuni-loop-poster.jpg" autoplay muted loop playsinline width="540" height="960"></video>
+    </figure>
+    <div class="facts">
+      <figure class="side up">
+        <img src="img/lize-short.jpg" alt="Akane Lize shouting “I forgot, okay?!” during an IQ test" width="720" height="1280" loading="lazy">
+        <figcaption>Akane Lize, IQ test. Chat ran at 2.8 times its usual pace.</figcaption>
+      </figure>
+      <div class="up">
+        <p>Every clip is one moment from a Korean VTuber’s stream, cut at the second her chat ran hottest. Yuni asking chat why they didn’t sell their stocks drew 2.5 times her usual chat pace.</p>
+        <p>Her own voice stays. You read English on screen, Korean and Japanese captions sit underneath, and every clip links back to the full stream.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="roster wrap" id="roster" aria-labelledby="roster-title">
+    <div class="col up">
+      <h2 class="giant" id="roster-title">roster</h2>
+      <p class="giant-sub">Who we clip right now. Open a name to see where she streams.</p>
+      <div class="bars">
+        <details open>
+          <summary>ayatsuno yuni <span class="where">chzzk</span></summary>
+          <div class="panel">
+            <img src="img/yuni-icon.jpg" alt="Ayatsuno Yuni" width="320" height="320" loading="lazy">
+            <dl>
+              <dt>Korean name</dt><dd class="ko">아야츠노 유니</dd>
+              <dt>Agency</dt><dd>StelLive</dd>
+              <dt>Streams on</dt><dd><a href="https://chzzk.naver.com/45e71a76e949e16a34764deb962f9d9f" target="_blank" rel="noopener">CHZZK</a></dd>
+              <dt>Latest clip</dt><dd>“Why didn’t you sell?”</dd>
+            </dl>
+          </div>
+        </details>
+        <details>
+          <summary>akane lize <span class="where">chzzk</span></summary>
+          <div class="panel">
+            <img src="img/lize-icon.jpg" alt="Akane Lize" width="320" height="320" loading="lazy">
+            <dl>
+              <dt>Korean name</dt><dd class="ko">아카네 리제</dd>
+              <dt>Agency</dt><dd>StelLive</dd>
+              <dt>Streams on</dt><dd><a href="https://chzzk.naver.com/4325b1d5bbc321fad3042306646e2e50" target="_blank" rel="noopener">CHZZK</a></dd>
+              <dt>Latest clip</dt><dd>“What’s an integer?”</dd>
+            </dl>
+          </div>
+        </details>
+        <details><summary>arahashi tabi <span class="where">chzzk</span></summary><div class="panel"><dl class="solo"><dt>Korean name</dt><dd class="ko">아라하시 타비</dd><dt>Agency</dt><dd>StelLive</dd><dt>Streams on</dt><dd><a href="https://chzzk.naver.com/a6c4ddb09cdb160478996007bff35296" target="_blank" rel="noopener">CHZZK</a></dd></dl></div></details>
+        <details><summary>tenko shibuki <span class="where">chzzk</span></summary><div class="panel"><dl class="solo"><dt>Korean name</dt><dd class="ko">텐코 시부키</dd><dt>Agency</dt><dd>StelLive</dd><dt>Streams on</dt><dd><a href="https://chzzk.naver.com/64d76089fba26b180d9c9e48a32600d9" target="_blank" rel="noopener">CHZZK</a></dd></dl></div></details>
+        <details><summary>shirayuki hina <span class="where">chzzk</span></summary><div class="panel"><dl class="solo"><dt>Korean name</dt><dd class="ko">시라유키 히나</dd><dt>Agency</dt><dd>StelLive</dd><dt>Streams on</dt><dd><a href="https://chzzk.naver.com/b044e3a3b9259246bc92e863e7d3f3b8" target="_blank" rel="noopener">CHZZK</a></dd></dl></div></details>
+        <details><summary>aokumo rin <span class="where">chzzk</span></summary><div class="panel"><dl class="solo"><dt>Korean name</dt><dd class="ko">아오쿠모 린</dd><dt>Agency</dt><dd>StelLive</dd><dt>Streams on</dt><dd><a href="https://chzzk.naver.com/516937b5f85cbf2249ce31b0ad046b0f" target="_blank" rel="noopener">CHZZK</a></dd></dl></div></details>
+        <details><summary>hanako nana <span class="where">chzzk</span></summary><div class="panel"><dl class="solo"><dt>Korean name</dt><dd class="ko">하나코 나나</dd><dt>Agency</dt><dd>StelLive</dd><dt>Streams on</dt><dd><a href="https://chzzk.naver.com/4d812b586ff63f8a2946e64fa860bbf5" target="_blank" rel="noopener">CHZZK</a></dd></dl></div></details>
+        <details><summary>yuzuha riko <span class="where">chzzk</span></summary><div class="panel"><dl class="solo"><dt>Korean name</dt><dd class="ko">유즈하 리코</dd><dt>Agency</dt><dd>StelLive</dd><dt>Streams on</dt><dd><a href="https://chzzk.naver.com/8fd39bb8de623317de90654718638b10" target="_blank" rel="noopener">CHZZK</a></dd></dl></div></details>
+        <details><summary>neneko mashiro <span class="where">chzzk</span></summary><div class="panel"><dl class="solo"><dt>Korean name</dt><dd class="ko">네네코 마시로</dd><dt>Agency</dt><dd>StelLive</dd><dt>Streams on</dt><dd><a href="https://chzzk.naver.com/4515b179f86b67b4981e16190817c580" target="_blank" rel="noopener">CHZZK</a></dd></dl></div></details>
+        <details><summary>sakihane huya <span class="where">chzzk</span></summary><div class="panel"><dl class="solo"><dt>Korean name</dt><dd class="ko">사키하네 후야</dd><dt>Agency</dt><dd>StelLive</dd><dt>Streams on</dt><dd><a href="https://chzzk.naver.com/36ddb9bb4f17593b60f1b63cec86611d" target="_blank" rel="noopener">CHZZK</a></dd></dl></div></details>
+      </div>
+    </div>
+  </section>
+
+  <section class="verbs" id="how" aria-label="How a clip gets made">
+    <div class="verb">
+      <img src="img/yuni-punch.jpg" alt="Yuni mid-sentence with the subtitle “Why didn’t you sell?”" width="720" height="1280" loading="lazy">
+      <div class="track"><h2>spike</h2></div>
+      <p>We read the replay’s chat and keep the twenty seconds where it ran hottest.</p>
+    </div>
+    <div class="verb">
+      <img src="img/lize-integer.jpg" alt="Lize asking “What even is an integer?”" width="720" height="1280" loading="lazy">
+      <div class="track"><h2>cut</h2></div>
+      <p>Her voice and face stay. The silences go, and the clip stops on the line people repeat.</p>
+    </div>
+    <div class="verb">
+      <img src="img/lize-laugh.jpg" alt="Lize laughing with a translated chat reaction beside her" width="720" height="1280" loading="lazy">
+      <div class="track"><h2>sub</h2></div>
+      <p>English on screen. Korean and Japanese captions underneath. Her real chat, translated beside her.</p>
+    </div>
+    <div class="verb">
+      <img src="img/yuni-ending.jpg" alt="Yuni’s ending screen with “Catch her live on CHZZK”" width="720" height="1280" loading="lazy">
+      <div class="track"><h2>drop</h2></div>
+      <p>Three clips a day, timed for evenings in the Americas, in Korea and Japan, and in Europe.
+        <span class="times" id="times">08:07, 20:07 and 00:37 Korea time.</span></p>
+    </div>
+  </section>
+
+  <section class="about wrap" aria-labelledby="about-title">
+    <h2 class="about-head" id="about-title">fan-made, by the rules</h2>
+    <div class="text up">
+      <p><b>GenieStudio</b> is fan-made, run by a <mark class="y">game developer</mark> who watches more Korean VTuber streams than is healthy. Most of the best moments never leave Korean-speaking chat, so we cut them down to thirty seconds and add <mark class="p">English subtitles</mark>.</p>
+      <p>We only clip agencies whose derivative-work guidelines allow it, starting with <mark class="y">StelLive</mark> on <mark class="k">CHZZK</mark>, and we follow those rules. Clips go up after the original stream is public, songs and other people’s work stay out, and every description says the clip is <mark class="p">fan-made</mark> and <mark class="y">links to the full stream</mark>. Each VTuber keeps her own voice; the subtitles, notes and timing are ours. If a clip ever crosses a line for a streamer or her agency, we take it down.</p>
+      <p><a class="ask" href="https://www.youtube.com/channel/UCJLASEKgCBydpHn1nBBXpjw" target="_blank" rel="noopener">Tell us who to clip next.</a></p>
+    </div>
+  </section>
+</main>
+
+<footer class="foot wrap">
+  <div class="links">
+    <nav aria-label="Watch"><h2>watch</h2><a href="https://www.youtube.com/channel/UCJLASEKgCBydpHn1nBBXpjw" target="_blank" rel="noopener">YouTube channel</a><a href="#clips">The clips</a></nav>
+    <nav aria-label="Site"><h2>site</h2><a href="#roster">Roster</a><a href="#how">How a clip gets made</a></nav>
+    <nav aria-label="Legal"><h2>legal</h2><a href="privacy.html">Privacy policy</a><a href="terms.html">Terms of use</a></nav>
+    <nav aria-label="Rules"><h2>rules</h2><a href="https://stellive.me/guideline" target="_blank" rel="noopener">StelLive guidelines</a></nav>
+    <div class="contact"><p>Fan-made. Not affiliated with StelLive, CHZZK or any agency.</p><p>Questions or takedown requests: comment on any clip.</p></div>
+  </div>
+  <div class="legal"><span>© 2026 GenieStudio</span><a class="btn" href="https://www.youtube.com/channel/UCJLASEKgCBydpHn1nBBXpjw?sub_confirmation=1" target="_blank" rel="noopener">subscribe</a></div>
+  <div class="blocks" aria-hidden="true"><span>g</span><span>e</span><span>n</span><span>i</span><span>e</span></div>
+</footer>
+
+<script>
+// The one live thing: the next drop in the visitor's own time. Drops are at 08:07, 20:07 and 00:37 Korea time (UTC+9).
+(function () {
+  var slots = [[8, 7], [20, 7], [0, 37]];
+  var fmt = new Intl.DateTimeFormat("en-US", { hour: "numeric", minute: "2-digit" });
+  function drops(from) {
+    var out = [];
+    for (var d = -1; d <= 1; d++) {
+      slots.forEach(function (s) {
+        var t = new Date(Date.UTC(from.getUTCFullYear(), from.getUTCMonth(), from.getUTCDate() + d, s[0] - 9, s[1]));
+        if (t > from) out.push(t);
+      });
+    }
+    return out.sort(function (a, b) { return a - b; });
+  }
+  function update() {
+    var now = new Date(), next = drops(now)[0], mins = Math.round((next - now) / 60000);
+    var wait = mins >= 60 ? Math.floor(mins / 60) + " h " + (mins % 60) + " min" : mins + " min";
+    document.getElementById("next").textContent = "Next clip: " + fmt.format(next) + " your time, in " + wait + ".";
+    var day = drops(now).slice(0, 3).sort(function (a, b) {
+      return (a.getHours() * 60 + a.getMinutes()) - (b.getHours() * 60 + b.getMinutes());
+    });
+    document.getElementById("times").textContent = "In your time: " + day.map(function (t) { return fmt.format(t); }).join(", ") + ".";
+  }
+  update();
+  setInterval(update, 30000);
+  // Section parts rise once as they enter. Without script, or with reduced motion, everything simply sits in place.
+  var els = document.querySelectorAll(".up");
+  if (!("IntersectionObserver" in window)) { els.forEach(function (e) { e.classList.add("in"); }); return; }
+  var io = new IntersectionObserver(function (es) {
+    es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } });
+  }, { rootMargin: "0px 0px -10% 0px" });
+  els.forEach(function (e) { io.observe(e); });
+})();
+</script>
+</body>
+</html>
