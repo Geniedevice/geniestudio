@@ -180,6 +180,19 @@ mark.y { background: var(--punch); } mark.p { background: var(--pink); } mark.k 
 .links .contact p { margin: 0; }
 .legal { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-top: 56px; font-size: 15px; color: var(--soft-on-ink); }
 
+/* post-process volumes: every section is a lighting environment (exposure, contrast, saturation, colour temperature,
+   one light source, vignette). A script blends the values by distance like a PostProcessVolume blend radius and writes
+   them here. Four sibling layers, not one wrapper: a wrapper with z-index would isolate the blend modes from the page.
+   Neutral defaults: without script nothing is graded. */
+:root { --pp-exp: 1; --pp-con: 1; --pp-sat: 1; --pp-tint: 255 255 255; --pp-ta: 0; --pp-light: 255 255 255; --pp-la: 0; --pp-lx: 50%; --pp-ly: 0%; --pp-vig: 0; }
+.pp { position: fixed; inset: 0; z-index: 40; pointer-events: none; }
+.pp-grade { -webkit-backdrop-filter: brightness(var(--pp-exp)) contrast(var(--pp-con)) saturate(var(--pp-sat)); backdrop-filter: brightness(var(--pp-exp)) contrast(var(--pp-con)) saturate(var(--pp-sat)); }
+/* colour temperature as a gel: multiply tints white paper too (soft-light leaves white untouched); dark panels get colour from the light */
+.pp-tint { background: rgb(var(--pp-tint)); opacity: var(--pp-ta); mix-blend-mode: multiply; }
+.pp-light { background: radial-gradient(ellipse 75% 60% at var(--pp-lx) var(--pp-ly), rgb(var(--pp-light)), transparent 70%); opacity: var(--pp-la); mix-blend-mode: screen; }
+.pp-vig { background: radial-gradient(ellipse 125% 95% at 50% 50%, transparent 52%, rgb(0 0 0 / var(--pp-vig))); }
+@media print { .pp { display: none; } }
+
 /* motion: the headline rises from behind its baseline; section parts rise once as they enter */
 @media (prefers-reduced-motion: no-preference) {
   .js .line > span { transform: translateY(105%); animation: rise 900ms var(--ease) forwards; }
@@ -226,6 +239,7 @@ mark.y { background: var(--punch); } mark.p { background: var(--pink); } mark.k 
 </head>
 <body>
 <script>document.documentElement.classList.add("js");</script>
+<div class="pp pp-grade" aria-hidden="true"></div><div class="pp pp-tint" aria-hidden="true"></div><div class="pp pp-light" aria-hidden="true"></div><div class="pp pp-vig" aria-hidden="true"></div>
 
 <header class="hero" aria-labelledby="title">
   <div class="field field--top"></div>
@@ -395,6 +409,57 @@ mark.y { background: var(--punch); } mark.p { background: var(--pink); } mark.k 
     es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } });
   }, { rootMargin: "0px 0px -10% 0px" });
   els.forEach(function (e) { io.observe(e); });
+})();
+
+// Post-process volumes. The camera is the middle of the screen. Inside a section its weight is 1; outside it falls off
+// linearly over the blend radius, so two neighbours mix 50/50 at their seam. Values chase the target a little each frame,
+// the way an engine eases between volumes, and snap when the visitor asked for reduced motion.
+(function () {
+  var V = [ // exposure, contrast, saturation, gel rgb + amount (white balance), light rgb + amount + position %, vignette
+    [".hero",   { exp: 0.97, con: 1.08, sat: 1.05, tint: [255, 250, 240], ta: 0.10, light: [255, 225, 77],  la: 0.30, lx: 50, ly: 100, vig: 0.45 }], // stage: yellow footlight from below
+    [".show",   { exp: 1.03, con: 1.00, sat: 1.00, tint: [255, 238, 214], ta: 0.30, light: [255, 255, 255], la: 0.10, lx: 85, ly: 0,   vig: 0.10 }], // daylight studio, warm window top right
+    [".latest", { exp: 0.98, con: 1.10, sat: 1.20, tint: [255, 175, 225], ta: 0.25, light: [255, 70, 170],  la: 0.40, lx: 12, ly: 10,  vig: 0.40 }], // neon arcade, magenta sign top left
+    [".roster", { exp: 1.02, con: 1.04, sat: 1.10, tint: [255, 185, 120], ta: 0.30, light: [255, 200, 90],  la: 0.30, lx: 92, ly: 0,   vig: 0.22 }], // golden hour, low sun top right
+    [".verbs",  { exp: 0.92, con: 1.12, sat: 0.90, tint: [150, 180, 255], ta: 0.35, light: [90, 150, 255],  la: 0.35, lx: 50, ly: 0,   vig: 0.50 }], // blue editing room, monitor light above
+    [".about",  { exp: 1.02, con: 0.97, sat: 0.95, tint: [255, 228, 196], ta: 0.32, light: [255, 240, 210], la: 0.15, lx: 8,  ly: 0,   vig: 0.14 }], // morning paper, soft light top left
+    [".foot",   { exp: 0.95, con: 1.06, sat: 1.05, tint: [195, 175, 255], ta: 0.30, light: [255, 90, 180],  la: 0.32, lx: 50, ly: 100, vig: 0.42 }]  // late night, neon from the street below
+  ].map(function (v) { return { el: document.querySelector(v[0]), s: v[1] }; }).filter(function (v) { return v.el; });
+  var keys = ["exp", "con", "sat", "ta", "la", "lx", "ly", "vig"], cols = ["tint", "light"];
+  var snap = window.matchMedia("(prefers-reduced-motion: reduce)").matches, root = document.documentElement.style, cur = null, raf = 0;
+  function target() {
+    var cam = innerHeight / 2, R = innerHeight * 0.75, sum = 0, out = {};
+    keys.forEach(function (k) { out[k] = 0; }); cols.forEach(function (k) { out[k] = [0, 0, 0]; });
+    V.forEach(function (v) {
+      var r = v.el.getBoundingClientRect(), d = cam < r.top ? r.top - cam : cam > r.bottom ? cam - r.bottom : 0, w = Math.max(0, 1 - d / R);
+      if (!w) return;
+      sum += w;
+      keys.forEach(function (k) { out[k] += v.s[k] * w; });
+      cols.forEach(function (k) { for (var i = 0; i < 3; i++) out[k][i] += v.s[k][i] * w; });
+    });
+    if (!sum) return cur;
+    keys.forEach(function (k) { out[k] /= sum; }); cols.forEach(function (k) { out[k] = out[k].map(function (c) { return c / sum; }); });
+    return out;
+  }
+  function apply(p) {
+    root.setProperty("--pp-exp", p.exp.toFixed(3)); root.setProperty("--pp-con", p.con.toFixed(3)); root.setProperty("--pp-sat", p.sat.toFixed(3));
+    root.setProperty("--pp-ta", p.ta.toFixed(3)); root.setProperty("--pp-la", p.la.toFixed(3)); root.setProperty("--pp-vig", p.vig.toFixed(3));
+    root.setProperty("--pp-lx", p.lx.toFixed(1) + "%"); root.setProperty("--pp-ly", p.ly.toFixed(1) + "%");
+    root.setProperty("--pp-tint", p.tint.map(Math.round).join(" ")); root.setProperty("--pp-light", p.light.map(Math.round).join(" "));
+  }
+  function frame() {
+    raf = 0;
+    var t = target(); if (!t) return;
+    if (!cur || snap) cur = t;
+    else {
+      var moving = false, ease = function (a, b) { var n = a + (b - a) * 0.12; if (Math.abs(b - n) > 0.002) moving = true; else n = b; return n; };
+      keys.forEach(function (k) { cur[k] = ease(cur[k], t[k]); });
+      cols.forEach(function (k) { cur[k] = cur[k].map(function (c, i) { return ease(c / 255, t[k][i] / 255) * 255; }); });
+      if (moving) raf = requestAnimationFrame(frame);
+    }
+    apply(cur);
+  }
+  function kick() { if (!raf) raf = requestAnimationFrame(frame); }
+  addEventListener("scroll", kick, { passive: true }); addEventListener("resize", kick); frame();
 })();
 </script>
 </body>
